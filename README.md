@@ -2,7 +2,7 @@
 
 **SudoClean** is a high-performance Sudoku application built with Java, focusing on clean Object-Oriented Design, test-driven development, and the implementation of classic design patterns.
 
-## 🛠 Project Information
+## Project Information
 * **Name of Project:** SudoClean Architect
 * **Team Members:** Aaditya Yanamandra (It's just me)
 * **Language:** Java (OpenJDK 21)
