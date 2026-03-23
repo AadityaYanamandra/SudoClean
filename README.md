@@ -4,7 +4,7 @@
 
 ## 🛠 Project Information
 * **Name of Project:** SudoClean Architect
-* **Team Members:** [Your Name]
+* **Team Members:** Aaditya Yanamandra (It's just me)
 * **Language:** Java (OpenJDK 21)
 * **Build System:** Gradle
 * **Persistence:** JSON (via GSON)
