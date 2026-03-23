@@ -11,7 +11,7 @@
 
 ---
 
-## 🧩 Design Patterns & Architecture
+## Design Patterns & Architecture
 
 To satisfy the core requirements of Object-Oriented Design, this project implements the following patterns:
 
@@ -29,7 +29,7 @@ To satisfy the core requirements of Object-Oriented Design, this project impleme
 
 ---
 
-## 🚀 OO Principles Implemented
+## OO Principles Implemented
 
 * **Coding to Abstractions:** All major systems (Solving, Commands, Persistence) are defined by interfaces in the `com.sudoclean.core` package.
 * **Dependency Injection:** The `Board` class does not instantiate its own solver. Instead, a concrete `ISolveStrategy` is injected into the `attemptSolve()` method.
@@ -37,7 +37,7 @@ To satisfy the core requirements of Object-Oriented Design, this project impleme
 
 ---
 
-## 🧪 Testing & Execution
+## Testing & Execution
 
 This project includes **7 meaningful test cases** covering validation logic, recursive solving, command undoing, and JSON persistence.
 
