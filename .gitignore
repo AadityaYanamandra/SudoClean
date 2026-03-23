@@ -1,0 +1,17 @@
+# Gradle files
+.gradle/
+build/
+
+# IDE files
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Persistence data (optional - ignore if you want a clean slate every time)
+# data/*.json
