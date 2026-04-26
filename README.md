@@ -39,7 +39,7 @@ To satisfy the core requirements of Object-Oriented Design, this project impleme
 
 ## Testing & Execution
 
-This project includes **7 meaningful test cases** covering validation logic, recursive solving, command undoing, and JSON persistence.
+This project includes 7 test cases covering validation logic, recursive solving, command undoing, and JSON persistence.
 
 ### To Run Tests:
 ```bash
