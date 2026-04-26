@@ -7,7 +7,8 @@
 * **Team Members:** Aaditya Yanamandra (It's just me)
 * **Language:** Java (OpenJDK 25.0.2)
 * **Build System:** Gradle
-* **Persistence:** JSON (via GSON)
+* **Persistence:** N/A
+* **UI:** Rudimentary using JavaFX
 
 ---
 
