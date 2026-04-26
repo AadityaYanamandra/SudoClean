@@ -2,34 +2,41 @@ package com.sudoclean.logic;
 
 import com.sudoclean.core.ISolveStrategy;
 import com.sudoclean.model.Board;
+import java.util.function.BooleanSupplier;
 
 public class BacktrackingStrategy implements ISolveStrategy {
-
     @Override
-    public boolean solve(Board board) {
-        for (int row = 0; row < Board.SIZE; row++) {
-            for (int col = 0; col < Board.SIZE; col++) {
-                
-                // Find an empty cell (represented by 0)
-                if (board.getCell(row, col) == 0) {
-                    for (int number = 1; number <= 9; number++) {
-                        
-                        if (board.isValid(row, col, number)) {
-                            board.setCell(row, col, number);
+    public boolean solve(Board board, BooleanSupplier shouldStop) {
+        // Check at every single recursive entry
+        if (shouldStop.getAsBoolean()) return false;
 
-                            // Recursively try to solve the rest of the board
-                            if (solve(board)) {
-                                return true;
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (board.getCell(row, col) == 0) {
+                    for (int n = 1; n <= 9; n++) {
+                        // Check inside the number loop for immediate response
+                        if (shouldStop.getAsBoolean()) return false;
+
+                        if (board.isValid(row, col, n)) {
+                            board.setCell(row, col, n);
+                            try { 
+                                Thread.sleep(20); 
+                            } catch (InterruptedException e) { 
+                                // Standard practice: stop if interrupted
+                                return false; 
                             }
 
-                            // If it didn't work, backtrack 
+                            if (solve(board, shouldStop)) return true;
+
+                            if (shouldStop.getAsBoolean()) return false;
+                            
                             board.setCell(row, col, 0);
                         }
                     }
-                    return false; // No number 1-9 worked here
+                    return false;
                 }
             }
         }
-        return true; // Board is full and valid
+        return true;
     }
 }
