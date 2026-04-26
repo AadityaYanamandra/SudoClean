@@ -8,12 +8,14 @@ import com.sudoclean.core.ISolveStrategy;
 
 public class Board {
     private int[][] grid;
+    private boolean[][] isOriginal;
     public static final int SIZE = 9;
 
     private List<IBoardObserver> observers = new ArrayList<>();
 
     public Board() {
         this.grid = new int[SIZE][SIZE];
+        this.isOriginal = new boolean[SIZE][SIZE];
     }
 
     public void setCell(int row, int col, int value) {
@@ -26,6 +28,26 @@ public class Board {
 
     public int getCell(int row, int col) {
         return grid[row][col];
+    }
+
+    public void setOriginal(int row, int col, int value) {
+        isOriginal[row][col] = (value != 0);
+        setCell(row, col, value);
+    }
+
+    public boolean isOriginal(int row, int col) {
+        return isOriginal[row][col];
+    }
+
+    public void clearSolverWork() {
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                // ONLY set to 0 if it was NOT part of the original puzzle
+                if (!isOriginal[r][c]) {
+                    setCell(r, c, 0);
+                }
+            }
+        }
     }
 
     public boolean isValid(int row, int col, int val) {
@@ -46,7 +68,7 @@ public class Board {
         return true;
     }
 
-    // Dependency Injection: Pass the strategy in
+    // dependency injection: pass the strategy in
     public boolean attemptSolve(ISolveStrategy strategy, java.util.function.BooleanSupplier shouldStop) {
         return strategy.solve(this, shouldStop);
     }
@@ -56,21 +78,22 @@ public class Board {
     }
 
     public void generateNewGame(int emptyCellsCount) {
-        // 1. Completely reset the grid
+        // 1. Reset everything first
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                grid[r][c] = 0; 
+                grid[r][c] = 0;
+                isOriginal[r][c] = false; // Reset the "puzzle" mask
             }
         }
 
-        // 2. Use the Random Strategy to create a valid full board
-        // We temporarily remove observers so the UI doesn't "blink" through the generation
+        // temporarily disable observers for silent generation
         List<IBoardObserver> tempObservers = new ArrayList<>(observers);
         observers.clear();
         
-        attemptSolve(new com.sudoclean.logic.RandomSolveStrategy(), () -> false);
+        // fill the board using the heuristic strategy
+        attemptSolve(new com.sudoclean.logic.HeuristicSolveStrategy(), () -> false);
         
-        // 3. Dig holes based on difficulty
+        // dig holes based on difficulty
         java.util.Random rand = new java.util.Random();
         int holes = 0;
         while (holes < emptyCellsCount) {
@@ -82,11 +105,20 @@ public class Board {
             }
         }
 
-        // 4. Restore observers and trigger a full UI refresh
+        // capture the "Puzzle State"
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                if (grid[r][c] != 0) {
+                    isOriginal[r][c] = true; // These are the numbers the user sees at start
+                }
+            }
+        }
+
+        // 5. Restore observers and refresh UI
         observers.addAll(tempObservers);
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                setCell(r, c, grid[r][c]); // This notifies the UI
+                setCell(r, c, grid[r][c]); 
             }
         }
     }

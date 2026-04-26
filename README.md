@@ -16,16 +16,19 @@
 To satisfy the core requirements of Object-Oriented Design, this project implements the following patterns:
 
 ### 1. Strategy Pattern
-* **Location:** `com.sudoclean.core.ISolveStrategy` and `com.sudoclean.logic.BacktrackingStrategy`
-* **Explanation:** The solving logic is decoupled from the `Board` class. By coding to the `ISolveStrategy` abstraction, the application can swap between different algorithms (e.g., Brute Force vs. Heuristic) at runtime without modifying the underlying data structure.
+* **Explanation:** By defining the ISolveStrategy interface and creating separate classes like BacktrackingStrategy and HeuristicSolveStrategy, I allow the solver's algorithm to be swapped at runtime without changing the Board or UI code.
+
+### 1. Observer Pattern
+* **Explanation:** My Board class acts as the "Subject" and SudokuUI acts as the "Observer." When a cell value changes in the model, the Board notifies all registered observers (via onCellChanged), which allows the UI to update automatically without the model needing to know anything about JavaFX.
+
+### 1. Singleton Pattern
+* **Explanation:** I utilize a GameConfig class (referenced in SudokuUI) to the global difficulty level. This ensures that throughout the application's lifecycle, there is only one source of truth for the game's current configuration.
 
 ### 2. Command Pattern
-* **Location:** `com.sudoclean.core.ICommand` and `com.sudoclean.commands.PlaceNumberCommand`
-* **Explanation:** Every move made by a user is encapsulated as an object. This allows for **Polymorphic** treatment of actions, enabling a robust Undo/Redo system where the invoker doesn't need to know the specifics of the move to revert it.
+* **Explanation:** My StepSolver and Timeline implementation acts as a state machine. Instead of a single recursive call, they encapsulate the state of the solve (the Stack of BoardState objects) so that each "step" can be executed, paused, or resumed as a distinct command pulse.
 
-### 3. Repository Pattern (Persistence)
-* **Location:** `com.sudoclean.core.IGameRepository` and `com.sudoclean.logic.JsonGameRepository`
-* **Explanation:** This pattern abstracts the data logic. It handles the **Persisted State** requirement by saving and loading the `Board` state to a local JSON file, ensuring the domain logic is independent of the storage format.
+### 3. Iterator Pattern
+* **Explanation:** The StepSolver essentially provides an internal iterator over the solution space. By calling step(), the UI "iterates" through the possible board states one by one until the Stack is empty or the board is full, rather than receiving the entire solution at once.
 
 ---
 
@@ -37,10 +40,10 @@ To satisfy the core requirements of Object-Oriented Design, this project impleme
 
 ---
 
-## Testing & Execution
+## Execution
 
-This project includes 7 test cases covering validation logic, recursive solving, command undoing, and JSON persistence.
+This project can be run with ./gradlew run --args"hard/easy" (argument is optional)
 
-### To Run Tests:
-```bash
-./gradlew test
+## Note
+
+The code having to do with the repository pattern was removed, as I genuinely am not of the opinion that a save/load system at all fits this project.

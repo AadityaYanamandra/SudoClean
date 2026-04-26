@@ -10,15 +10,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
 public class SudokuUI extends Application implements IBoardObserver {
     private Board board = new Board();
     private TextField[][] cells = new TextField[9][9];
-    private Thread solverThread;
 
     private ComboBox<String> strategyBox;
     private Button solveBtn;
 
-    private SudokuSolverManager solverManager = new SudokuSolverManager();
+    private Timeline timeline;
+    private StepSolver currentSolver;
 
     @Override
     public void start(Stage stage) {
@@ -48,7 +52,7 @@ public class SudokuUI extends Application implements IBoardObserver {
 
         // strategy choice dropdown
         strategyBox = new ComboBox<>();
-        strategyBox.getItems().addAll("Backtracking", "Random");
+        strategyBox.getItems().addAll("Backtracking", "Heuristic");
         strategyBox.setValue("Backtracking");
 
         // controls
@@ -59,11 +63,14 @@ public class SudokuUI extends Application implements IBoardObserver {
         // button actions
         solveBtn.setOnAction(e -> handleSolveClick());
 
-        stopBtn.setOnAction(e -> {
-            if (solverThread != null) solverThread.interrupt();
-            Platform.exit();
-            System.exit(0);
-        });
+    stopBtn.setOnAction(e -> {
+        // use the timeline to stop the process instead of a thread
+        if (timeline != null) {
+            timeline.stop();
+        }
+        Platform.exit();
+        System.exit(0);
+    });
 
         checkBtn.setOnAction(e -> {
             if (isCompletelySolved()) {
@@ -86,12 +93,11 @@ public class SudokuUI extends Application implements IBoardObserver {
             for (int c = 0; c < 9; c++) {
                 int val = board.getCell(r, c);
                 
-                // 1. Check if empty
+                // check if empty
                 if (val == 0) return false;
 
-                // 2. Check if valid in current context
-                // Temporarily lift the value to see if it COULD be placed there
-                // based on the rest of the board.
+                // check if valid in current context
+                // temporarily lift the value to see if it COULD be placed there based on the rest of the board.
                 board.setCell(r, c, 0); 
                 boolean isValid = board.isValid(r, c, val);
                 board.setCell(r, c, val); // Put it back
@@ -115,18 +121,27 @@ public class SudokuUI extends Application implements IBoardObserver {
     }
 
     private void handleSolveClick() {
-        // If we are currently solving AND haven't requested a stop yet
-        if (solverManager.isRunning()) {
-            solverManager.stop();
-            // toggleUI(false) will be called automatically by the Manager's thread finally block
-            return;
+        if (timeline != null && timeline.getStatus() == javafx.animation.Animation.Status.RUNNING) {
+            timeline.stop();
+            toggleUI(false);
+            return; 
         }
 
-        ISolveStrategy strategy = strategyBox.getValue().equals("Random") ? 
-            new RandomSolveStrategy() : new BacktrackingStrategy();
+        // wipe all non-original numbers so the solver starts from a 100% valid state
+        board.clearSolverWork();
 
-        // Start fresh
-        solverManager.startSolve(board, strategy, () -> toggleUI(false));
+        currentSolver = new StepSolver(board);
+        
+        timeline = new Timeline(new KeyFrame(Duration.millis(20), e -> {
+            if (currentSolver.step()) {
+                timeline.stop();
+                toggleUI(false);
+                System.out.println("CLI: Solve completed successfully.");
+            }
+        }));
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
         toggleUI(true);
     }
 }
